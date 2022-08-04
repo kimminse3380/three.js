@@ -1,4 +1,5 @@
 import * as THREE from '../build/three.module.js';
+import { OrbitControls } from '../examples/jsm/controls/OrbitControls.js'
 
 class App {
     constructor() {
@@ -16,11 +17,16 @@ class App {
         this._setupCamera();
         this._setupLight();
         this._setupModel();
+        this._setupControls();
 
         window.onresize = this.resize.bind(this);
         this.resize();
 
         requestAnimationFrame(this.render.bind(this));
+    }
+
+    _setupControls() {
+     new OrbitControls(this._camera, this._divContainer);
     }
 
     _setupCamera() {
@@ -79,8 +85,8 @@ class App {
 
     update(time){
         time*=0.001;
-        this._cube.rotation.x = time;
-        this._cube.rotation.y = time;
+        //this._cube.rotation.x = time;
+        //this._cube.rotation.y = time;
     }
 }
 
