@@ -45,13 +45,20 @@ class App {
     }
 
     _setupModel(){
-    const geometry = new THREE.BoxGeometry(1, 1, 1);
-    const fillMaterial = new THREE.MeshPhongMaterial({ color: 0x44a88 });
-
-    const cube = new THREE.Mesh(geometry, fillMaterial);
+        const geometry = new THREE.BoxGeometry(1, 1, 1);
+        const fillMaterial = new THREE.MeshPhongMaterial({ color: 0x515151 });
+        const cube = new THREE.Mesh(geometry, fillMaterial);
     
-    this._scene.add(cube);
-    this._cube = cube;
+        const lineMaterial = new THREE.LineBasicMaterial({color: 0xffff00});
+        const line = new THREE.LineSegments(
+          new THREE.WireframeGeometry(geometry), lineMaterial);
+        const group = new THREE.Group()
+    
+        group.add(cube);
+        group.add(line);
+        
+        this._scene.add(group);
+        this._cube = group;
     }
 
     resize(){
