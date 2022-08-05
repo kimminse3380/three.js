@@ -2,7 +2,7 @@ import * as THREE from '../build/three.module.js';
 
 class App {
     constructor() {
-        const divContainer = document.querySelector("#webgl-container");
+        const divContainer = document.querySelector("#webgl-container"); //01-basic html에서 div 호출
         this._divContainer = divContainer;
 
         const renderer = new THREE.WebGL1Renderer({antialias:true});

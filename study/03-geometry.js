@@ -51,17 +51,20 @@ class App {
     }
 
     _setupModel(){
-        const geometry = new THREE.BoxGeometry(1, 1, 1, 1, 1, 1);//가로, 세로, 높이, 가로 블럭 개수, 세로 블럭 개수, 높이 블럭 개수 
+        // const geometry = new THREE.CircleGeometry(1,16, 0, Math.PI*2); 
+        //const geometry = new THREE.ConeGeometry(1, 1, 16, 9, false, 0, Math.PI*2);
+        //const geometry = new THREE.CylinderGeometry(0.9, 1, 1, 32, 12, false, 0, Math.PI*2);
+        const geometry = new THREE.SphereGeometry(1, 109, 100, 0, Math.PI*2, 0, Math.PI);
         const fillMaterial = new THREE.MeshPhongMaterial({ color: 0x515151 });
         const cube = new THREE.Mesh(geometry, fillMaterial);
     
-        const lineMaterial = new THREE.LineBasicMaterial({color: 0xffff00}); //라인 색깔
+        const lineMaterial = new THREE.LineBasicMaterial({color: 0xffff00});
         const line = new THREE.LineSegments(
-          new THREE.WireframeGeometry(geometry), lineMaterial); // 도형에 라인 만들기
+          new THREE.WireframeGeometry(geometry), lineMaterial);
         const group = new THREE.Group()
     
         group.add(cube);
-        group.add(line);
+        // group.add(line);
         
         this._scene.add(group);
         this._cube = group;
