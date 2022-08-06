@@ -1,5 +1,5 @@
 import * as THREE from '../build/three.module.js';
-import { OrbitControls } from '../examples/jsm/controls/OrbitControls.js'
+import { OrbitControls } from '../examples/jsm/controls/OrbitControls.js' // 마우스로 회전시키게 하는 모듈 호출
 
 class App {
     constructor() {
@@ -17,7 +17,7 @@ class App {
         this._setupCamera();
         this._setupLight();
         this._setupModel();
-        this._setupControls();
+        this._setupControls(); // 회전 시키는 함수 호출
 
         window.onresize = this.resize.bind(this);
         this.resize();
@@ -26,7 +26,7 @@ class App {
     }
 
     _setupControls() {
-     new OrbitControls(this._camera, this._divContainer);
+     new OrbitControls(this._camera, this._divContainer); // 회전 시키게 하는 코드
     }
 
     _setupCamera() {
@@ -85,7 +85,7 @@ class App {
 
     update(time){
         time*=0.001;
-        //this._cube.rotation.x = time;
+        //this._cube.rotation.x = time; // 자동 회전 하게 만들던 코드를 지우기
         //this._cube.rotation.y = time;
     }
 }
