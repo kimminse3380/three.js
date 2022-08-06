@@ -51,7 +51,7 @@ class App {
     }
 
     _setupModel(){
-        const geometry = new THREE.BoxGeometry(1, 1, 1, 1, 1, 1);//가로, 세로, 높이, 가로 블럭 개수, 세로 블럭 개수, 높이 블럭 개수 
+        const geometry = new THREE.BoxGeometry(1, 1, 1, 1, 1, 1);//정육면체
         const fillMaterial = new THREE.MeshPhongMaterial({ color: 0x515151 });
         const cube = new THREE.Mesh(geometry, fillMaterial);
     
