@@ -5,14 +5,17 @@
 ### 01-basic
 
 three.js의 기본기
+
 [js 코드보기](https://github.com/kimminse3380/ms_three.js/blob/master/study/01-basic.js)
 
 ### 02-geometry
 
 마우스로 geometry를 회전 시키기, geomtry에 선 만들기
+
 [js 코드보기](https://github.com/kimminse3380/ms_three.js/blob/master/study/02-geometry.js)
 
 ### 03-geometry
 
 다양한 geometry
+
 [js 코드보기](https://github.com/kimminse3380/ms_three.js/blob/master/study/03-geometry.js)
