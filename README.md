@@ -2,11 +2,14 @@
 
 코드는 study 파일에서 확인 가능합니다.
 
-## 01-basic
+## basic
 
 three.js의 기본
 
 [js 코드보기](https://github.com/kimminse3380/ms_three.js/blob/master/study/01-basic.js)
+
+****
+
 
 ## geometry
 ### 02-geometry
