@@ -54,7 +54,8 @@ class App {
         //const geometry = new THREE.CircleGeometry(1,16, 0, Math.PI*2); // 원
         //const geometry = new THREE.ConeGeometry(1, 1, 16, 9, false, 0, Math.PI*2); //원뿔
         //const geometry = new THREE.CylinderGeometry(0.9, 1, 1, 32, 12, false, 0, Math.PI*2); //기둥
-        const geometry = new THREE.SphereGeometry(1, 109, 100, 0, Math.PI*2, 0, Math.PI); //구
+        // const geometry = new THREE.SphereGeometry(1, 109, 100, 0, Math.PI*2, 0, Math.PI); //구
+        const geometry = new THREE.RingGeometry();
         const fillMaterial = new THREE.MeshPhongMaterial({ color: 0x515151 });
         const cube = new THREE.Mesh(geometry, fillMaterial);
     
