@@ -54,8 +54,11 @@ class App {
         //const geometry = new THREE.CircleGeometry(1,16, 0, Math.PI*2); // 원
         //const geometry = new THREE.ConeGeometry(1, 1, 16, 9, false, 0, Math.PI*2); //원뿔
         //const geometry = new THREE.CylinderGeometry(0.9, 1, 1, 32, 12, false, 0, Math.PI*2); //기둥
-        // const geometry = new THREE.SphereGeometry(1, 109, 100, 0, Math.PI*2, 0, Math.PI); //구
-        const geometry = new THREE.RingGeometry();
+        //const geometry = new THREE.SphereGeometry(1, 109, 100, 0, Math.PI*2, 0, Math.PI); //구
+        //const geometry = new THREE.RingGeometry(0.5, 1, 6, 2, 0, Math.PI*2); //2차원 링
+        //const geometry = new THREE.PlaneGeometry(1, 1, 2, 1); //2차원 사각형
+        //const geometry = new THREE.TorusGeometry(0.9, 0.4, 24, 100, Math.PI*2); //3차원 링
+        const geometry = new THREE.TorusKnotGeometry(0.6, 0.1, 64, 32, 3, 4); //TorusKnot 복잡한 무언가 쓸 일이 거의 없음
         const fillMaterial = new THREE.MeshPhongMaterial({ color: 0x515151 });
         const cube = new THREE.Mesh(geometry, fillMaterial);
     
@@ -65,7 +68,7 @@ class App {
         const group = new THREE.Group()
     
         group.add(cube);
-        // group.add(line);
+        group.add(line);
         
         this._scene.add(group);
         this._cube = group;
