@@ -82,37 +82,71 @@ class App {
 
 
     // shape을 통해 하트 geometry 만들기
-    _setupModel() {
+    // _setupModel() {
 
-        const shape = new THREE.Shape();
+    //     const shape = new THREE.Shape();
     
-        const x = -2.5, y= -5;
-        shape.moveTo(x + 2.5, y + 2.5);
-        shape.bezierCurveTo(x + 2.5, y + 2.5, x + 2, y, x, y); // bezierCurveTo를 이해하기 위해서는 curve를 공부해야함
-        shape.bezierCurveTo(x - 3, y, x - 3, y + 3.5, x - 3, y + 3.5);
-        shape.bezierCurveTo(x - 3, y + 5.5, x - 1.5, y + 7.7, x + 2.5, y + 9.5);
-        shape.bezierCurveTo(x + 6, y + 7.7, x + 8, y + 4.5, x + 8, y + 3.5);
-        shape.bezierCurveTo(x + 8, y + 3.5, x + 8, y, x + 5, y);
-        shape.bezierCurveTo(x + 3.5, y, x + 2.5, y + 2.5, x + 2.5, y + 2.5);
+    //     const x = -2.5, y= -5;
+    //     shape.moveTo(x + 2.5, y + 2.5);
+    //     shape.bezierCurveTo(x + 2.5, y + 2.5, x + 2, y, x, y); // bezierCurveTo를 이해하기 위해서는 curve를 공부해야함
+    //     shape.bezierCurveTo(x - 3, y, x - 3, y + 3.5, x - 3, y + 3.5);
+    //     shape.bezierCurveTo(x - 3, y + 5.5, x - 1.5, y + 7.7, x + 2.5, y + 9.5);
+    //     shape.bezierCurveTo(x + 6, y + 7.7, x + 8, y + 4.5, x + 8, y + 3.5);
+    //     shape.bezierCurveTo(x + 8, y + 3.5, x + 8, y, x + 5, y);
+    //     shape.bezierCurveTo(x + 3.5, y, x + 2.5, y + 2.5, x + 2.5, y + 2.5);
     
-        const geometry = new THREE.ShapeGeometry(shape);
+    //     const geometry = new THREE.ShapeGeometry(shape);
     
-        const fillMaterial = new THREE.MeshPhongMaterial({ color: 0x515151 });
-        const cube = new THREE.Mesh(geometry, fillMaterial);
+    //     const fillMaterial = new THREE.MeshPhongMaterial({ color: 0x515151 });
+    //     const cube = new THREE.Mesh(geometry, fillMaterial);
     
-        const lineMaterial = new THREE.LineBasicMaterial({color: 0xffff00});
+    //     const lineMaterial = new THREE.LineBasicMaterial({color: 0xffff00});
 
-        const line = new THREE.LineSegments(
-          new THREE.WireframeGeometry(geometry), lineMaterial);
+    //     const line = new THREE.LineSegments(
+    //       new THREE.WireframeGeometry(geometry), lineMaterial);
         
-        const group = new THREE.Group()
+    //     const group = new THREE.Group()
  
-        group.add(cube);
-        group.add(line);
+    //     group.add(cube);
+    //     group.add(line);
         
-        this._scene.add(group);
-        this._cube = group;
-    }
+    //     this._scene.add(group);
+    //     this._cube = group;
+    // }
+
+
+    // 3D 하트
+    _setupModel() {
+		const shape = new THREE.Shape(); // Shape 클래스 생성
+		shape.moveTo(0, 1.5);
+		shape.bezierCurveTo(2, 3.5, 4, 1.5, 2, -0.5);
+		shape.lineTo(0, -2.5);
+		shape.lineTo(-2, -0.5);
+		shape.bezierCurveTo(-4, 1.5, -2, 3.5, 0, 1.5);
+		const settings = {
+            steps: 1, //깊이 방향으로의 분할 수 default 1
+            depth: 1, //깊이 값 default 1
+            bevelEnabled: true, // beveling 처리 여부 default true
+            bevelThickness: 1.4, //beveling 두께값 default 6
+            bevelSize: 1.3, //shape의 외곽선으로부터 얼마나 멀리 beveling 할 것인지=> 커질수록 부푸는것 같음 default 2
+            bevelSegments: 2, //beveling 단계수
+          };
+          const geometry = new THREE.ExtrudeGeometry(shape, settings);
+
+		const fillMaterial = new THREE.MeshPhongMaterial({ color: 0xff0000}); 
+		const cube = new THREE.Mesh(geometry, fillMaterial);
+
+		const lineMaterial = new THREE.LineBasicMaterial({ color: 0xffff00 });
+		const line = new THREE.LineSegments(
+			new THREE.WireframeGeometry(geometry),
+			lineMaterial
+		); 
+  
+		const group = new THREE.Group();
+		group.add(cube);
+		this._scene.add(group);
+		this._cube = group; 
+	}
     
 
     resize(){
