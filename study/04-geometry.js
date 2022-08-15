@@ -1,5 +1,7 @@
 import * as THREE from '../build/three.module.js';
 import { OrbitControls } from '../examples/jsm/controls/OrbitControls.js'
+import { FontLoader } from '../examples/jsm/loaders/FontLoader.js';
+import { TextGeometry } from '../examples/jsm/geometries/TextGeometry.js'
 
 class App {
     constructor() {
@@ -116,36 +118,78 @@ class App {
 
 
     // 3D 하트
-    _setupModel() {
-		const shape = new THREE.Shape(); // Shape 클래스 생성
-		shape.moveTo(0, 1.5);
-		shape.bezierCurveTo(2, 3.5, 4, 1.5, 2, -0.5);
-		shape.lineTo(0, -2.5);
-		shape.lineTo(-2, -0.5);
-		shape.bezierCurveTo(-4, 1.5, -2, 3.5, 0, 1.5);
-		const settings = {
-            steps: 1, //깊이 방향으로의 분할 수 default 1
-            depth: 1, //깊이 값 default 1
-            bevelEnabled: true, // beveling 처리 여부 default true
-            bevelThickness: 1.4, //beveling 두께값 default 6
-            bevelSize: 1.3, //shape의 외곽선으로부터 얼마나 멀리 beveling 할 것인지=> 커질수록 부푸는것 같음 default 2
-            bevelSegments: 2, //beveling 단계수
-          };
-          const geometry = new THREE.ExtrudeGeometry(shape, settings);
+    // _setupModel() {
+	// 	const shape = new THREE.Shape(); // Shape 클래스 생성
+	// 	shape.moveTo(0, 1.5);
+	// 	shape.bezierCurveTo(2, 3.5, 4, 1.5, 2, -0.5);
+	// 	shape.lineTo(0, -2.5);
+	// 	shape.lineTo(-2, -0.5);
+	// 	shape.bezierCurveTo(-4, 1.5, -2, 3.5, 0, 1.5);
+	// 	const settings = {
+    //         steps: 1, //깊이 방향으로의 분할 수
+    //         depth: 1, //깊이 값
+    //         bevelEnabled: true, // beveling 처리 여부
+    //         bevelThickness: 1.4, //beveling 두께값
+    //         bevelSize: 1.3, //shape의 외곽선으로부터 얼마나 멀리 beveling 할 것인지=> 커질수록 부푸는것 같음
+    //         bevelSegments: 2, //beveling 단계수
+    //       };
+    //       const geometry = new THREE.ExtrudeGeometry(shape, settings);
 
-		const fillMaterial = new THREE.MeshPhongMaterial({ color: 0xff0000}); 
-		const cube = new THREE.Mesh(geometry, fillMaterial);
+	// 	const fillMaterial = new THREE.MeshPhongMaterial({ color: 0xff0000}); 
+	// 	const cube = new THREE.Mesh(geometry, fillMaterial);
 
-		const lineMaterial = new THREE.LineBasicMaterial({ color: 0xffff00 });
-		const line = new THREE.LineSegments(
-			new THREE.WireframeGeometry(geometry),
-			lineMaterial
-		); 
+	// 	const lineMaterial = new THREE.LineBasicMaterial({ color: 0xffff00 });
+	// 	const line = new THREE.LineSegments(
+	// 		new THREE.WireframeGeometry(geometry),
+	// 		lineMaterial
+	// 	); 
   
-		const group = new THREE.Group();
-		group.add(cube);
-		this._scene.add(group);
-		this._cube = group; 
+	// 	const group = new THREE.Group();
+	// 	group.add(cube);
+	// 	this._scene.add(group);
+	// 	this._cube = group;     
+	// }
+
+    // 글자 입체
+    _setupModel() {
+        const fontLoader = new FontLoader();
+        // 폰트 데이터를 비동기적으로 불러오기 위한 비동기 함수
+        async function loadFont(that) {
+          const url = "../examples/fonts/helvetiker_regular.typeface.json";
+          const font = await new Promise((resolve, reject) => {
+            fontLoader.load(url, resolve, undefined, reject);
+          });
+    
+          // TextGeometry 생성
+          const geometry = new TextGeometry("kim", {
+            font: font,
+            size: 5,
+            height: 1.5,
+            curveSegments: 4,
+            // setting for ExtrudeGeometry
+            bevelEnabled: true,
+            bevelThickness: 0.7,
+            bevelSize: .7,
+            bevelSegments: 2
+          });
+    
+          // 함수 내부에서 geometry 생성하고 있기때문에 아래 코드도 비동기 함수 내에서 호출 
+          const fillMaterial = new THREE.MeshPhongMaterial({ color: 0x515151 });
+          const cube = new THREE.Mesh(geometry, fillMaterial);
+    
+          const lineMaterial = new THREE.LineBasicMaterial({color: 0xffff00});
+          const line = new THREE.LineSegments(
+            new THREE.WireframeGeometry(geometry), lineMaterial);
+        
+          const group = new THREE.Group()
+          group.add(cube);
+        //   group.add(line);
+    
+          that._scene.add(group);
+          that._cube = group;
+        };
+        // this인자와 함께 호출
+        loadFont(this);
 	}
     
 
