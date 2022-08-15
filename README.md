@@ -33,3 +33,11 @@ shape으로 원하는 모양 goemetry 만들기
 [js 코드보기](https://github.com/kimminse3380/ms_three.js/blob/master/study/04-geometry.js)
 
 ****
+
+### 05-geometry
+
+curve으로 곡선 공부, 곡선으로 구성된 geometry 만들기
+
+[js 코드보기](https://github.com/kimminse3380/ms_three.js/blob/master/study/05-geometry.js)
+
+****
