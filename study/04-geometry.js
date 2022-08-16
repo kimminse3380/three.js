@@ -161,7 +161,7 @@ class App {
           });
     
           // TextGeometry 생성
-          const geometry = new TextGeometry("kim", {
+          const geometry = new TextGeometry("sejin", {
             font: font,
             size: 5,
             height: 1.5,
@@ -174,7 +174,7 @@ class App {
           });
     
           // 함수 내부에서 geometry 생성하고 있기때문에 아래 코드도 비동기 함수 내에서 호출 
-          const fillMaterial = new THREE.MeshPhongMaterial({ color: 0x515151 });
+          const fillMaterial = new THREE.MeshPhongMaterial({ color: 0xffffff });
           const cube = new THREE.Mesh(geometry, fillMaterial);
     
           const lineMaterial = new THREE.LineBasicMaterial({color: 0xffff00});
@@ -185,7 +185,7 @@ class App {
           group.add(cube);
         //   group.add(line);
     
-          that._scene.add(group);
+          that._scene.add(group);ㅌ``
           that._cube = group;
         };
         // this인자와 함께 호출
