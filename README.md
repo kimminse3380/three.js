@@ -46,6 +46,14 @@ curve으로 곡선 공부, 곡선으로 구성된 geometry 만들기
 
 scene graph를 통해 태양과 지구, 달의 자전,공전 만들기
 
+[js 코드보기](https://github.com/kimminse3380/three.js/blob/master/study/06-scene.js)
+
+****
+
+### 07-basic
+
+blender와 three.js를 이용해 메타버스 구현하기
+
 [js 코드보기](https://github.com/kimminse3380/ms_three.js/blob/master/study/05-geometry.js)
 
 ****
