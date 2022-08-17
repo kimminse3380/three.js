@@ -1,6 +1,7 @@
 import * as THREE from '../build/three.module.js';
 import { OrbitControls } from "../examples/jsm/controls/OrbitControls.js"
 import { GLTFLoader } from "../examples/jsm/loaders/GLTFLoader.js"
+import Stats from "../examples/jsm/libs/stats.module.js";
 
 class App {
     constructor() {
@@ -10,6 +11,9 @@ class App {
         const renderer = new THREE.WebGLRenderer({ antialias: true });
         renderer.setPixelRatio(window.devicePixelRatio);
         divContainer.appendChild(renderer.domElement);
+
+        renderer.shadowMap.enabled = true;
+        renderer.shadowMap.type = THREE.VSMShadowMap;
 
         this._renderer = renderer;
 
@@ -29,12 +33,41 @@ class App {
 
     _setupControls() {
         this._controls = new OrbitControls(this._camera, this._divContainer);
+        this._controls.target.set(0, 100, 0);
+
+        const stats = new Stats();
+        this._divContainer.appendChild(stats.dom);
+        this._fps = stats;
     }
 
     _setupModel() {
+        const planeGeometry = new THREE.PlaneGeometry(1000, 1000);
+        const planeMaterial = new THREE.MeshPhongMaterial({color: 0x878787 });
+        const plane = new THREE.Mesh(planeGeometry, planeMaterial);
+        plane.rotation.x = -Math.PI/2;
+        this._scene.add(plane);
+        plane.receiveShadow=true;
+
         new GLTFLoader().load("./data/character.glb", (gltf) => {
             const model = gltf.scene;
             this._scene.add(model);
+
+            model.traverse(child => {
+                if(child instanceof THREE.Mesh) {
+                    child.castShadow = true;
+                }
+            });
+
+            const box=(new THREE.Box3).setFromObject(model);
+            model.position.y=(box.max.y-box.min.y)/2;
+
+            const axisHelper = new THREE.AxesHelper(1000);
+            this._scene.add(axisHelper);
+
+            const boxHelper = new THREE.BoxHelper(model);
+            this._scene.add(boxHelper);
+            this._boxHelper = boxHelper;
+            this._model = model;
         });
     }
 
@@ -43,25 +76,66 @@ class App {
             60, 
             window.innerWidth / window.innerHeight, 
             1, 
-            500
+            5000
         );
 
-        camera.position.z = 200;
+        camera.position.set(0, 100, 500);
         this._camera = camera;
     }
 
-    _setupLight() {
+    _addPointLight(x, y, z, helperColor) {
         const color = 0xffffff;
-        const intensity = 10;
-        const light = new THREE.DirectionalLight(color, intensity);
-        light.position.set(0, 0, 1);
-        this._scene.add(light);
+        const intensity = 1.5;
+
+        const pointLight = new THREE.PointLight(color, intensity, 2000);
+        pointLight.position.set(x, y, z);
+
+        this._scene.add(pointLight);
+
+        const pointLightHelper = new THREE.PointLightHelper(pointLight, 10, helperColor);
+        this._scene.add(pointLightHelper);
+    }
+
+    _setupLight() {
+        const ambientLight = new THREE.AmbientLight(0xffffff, .5);
+        this._scene.add(ambientLight);
+
+        this._addPointLight(500, 150, 500, 0xff0000);
+        this._addPointLight(-500, 150, 500, 0xffff00);
+        this._addPointLight(-500, 150, -500, 0x00ff00);
+        this._addPointLight(500, 150, -500, 0x0000ff);
+
+        const shadowLight = new THREE.DirectionalLight(0xffffff, 0.2);
+        shadowLight.position.set(200, 500, 200);
+        shadowLight.target.position.set(0, 0, 0);
+        const directionalLightHelper = new THREE.DirectionalLightHelper(shadowLight, 10);
+        this._scene.add(directionalLightHelper);
+        
+        this._scene.add(shadowLight);
+        this._scene.add(shadowLight.target);
+
+        shadowLight.castShadow = true;
+        shadowLight.shadow.mapSize.width = 1024;
+        shadowLight.shadow.mapSize.height = 1024;
+        shadowLight.shadow.camera.top = shadowLight.shadow.camera.right = 700;
+        shadowLight.shadow.camera.bottom = shadowLight.shadow.camera.left = -700;
+        shadowLight.shadow.camera.near = 100;
+        shadowLight.shadow.camera.far = 900;
+        shadowLight.shadow.radius = 5;
+        const shadowCameraHelper = new THREE.CameraHelper(shadowLight.shadow.camera);
+        this._scene.add(shadowCameraHelper);
     }
 
     update(time) {
         time *= 0.001; // second unit
 
-        this._controls.update
+        this._controls.update();
+
+        if(this._boxHelper){
+            this._boxHelper.update();
+        }
+
+        this._fps.update();
     }
 
     render(time) {
