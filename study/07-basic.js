@@ -34,10 +34,44 @@ class App {
     _setupControls() {
         this._controls = new OrbitControls(this._camera, this._divContainer);
         this._controls.target.set(0, 100, 0);
-
+        
         const stats = new Stats();
         this._divContainer.appendChild(stats.dom);
-        this._fps = stats;
+        this._fps = stats; 
+        
+        this._pressedKeys = {};
+
+        document.addEventListener("keydown", (event) => {
+            this._pressedKeys[event.key.toLowerCase()] = true;
+            this._processAnimation();
+        });
+
+        document.addEventListener("keyup", (event) => {
+            this._pressedKeys[event.key.toLowerCase()] = false;
+            this._processAnimation();
+        });
+    }
+    
+    _processAnimation() {
+        const previousAnimationAction = this._currentAnimationAction;
+
+        if(this._pressedKeys["w"] || this._pressedKeys["a"] || this._pressedKeys["s"] || this._pressedKeys["d"]) {
+            if(this._pressedKeys["shift"]) {
+                this._currentAnimationAction = this._animationMap["Run"];
+            } else {
+                this._currentAnimationAction = this._animationMap["Walk"];                
+            }
+        } else {
+            this._currentAnimationAction = this._animationMap["Idle"];
+        }
+        if(this._pressedKeys["c"]) {
+            this._currentAnimationAction = this._animationMap["Capoeira"];
+        }
+
+        if(previousAnimationAction !== this._currentAnimationAction) {
+            previousAnimationAction.fadeOut(0.5);
+            this._currentAnimationAction.reset().fadeIn(0.5).play();
+        }
     }
 
     _setupModel() {
@@ -57,6 +91,20 @@ class App {
                     child.castShadow = true;
                 }
             });
+
+            const animationClips = gltf.animations;
+            const mixer = new THREE.AnimationMixer(model);
+            const animationsMap ={};
+            animationClips.forEach(clip => {
+                const name=clip.name;
+                console.log(name);
+                animationsMap[name] = mixer.clipAction(clip);
+            });
+
+            this._mixer = mixer;
+            this._animationMap=animationsMap;
+            this._currentAnimationAction = this._animationMap["Idle"];
+            this._currentAnimationAction.play();
 
             const box=(new THREE.Box3).setFromObject(model);
             model.position.y=(box.max.y-box.min.y)/2;
@@ -136,6 +184,12 @@ class App {
         }
 
         this._fps.update();
+
+        if(this._mixer){
+            const deltaTime = time - this._previousTime;
+            this._mixer.update(deltaTime);
+        }
+        this._previousTime = time;
     }
 
     render(time) {
