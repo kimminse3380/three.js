@@ -226,7 +226,7 @@ class App {
             const rotateQuarternion = new THREE.Quaternion();
             rotateQuarternion.setFromAxisAngle(
                 new THREE.Vector3(0,1,0),
-                angleCameraDirectionAxisY + this._directionOffset() // 누르는 키에 따른 캐릭터가 보는 방향을 정해주는 곳
+                angleCameraDirectionAxisY + this._directionOffset()
             );
 
             this._model.quaternion.rotateTowards(rotateQuarternion, THREE.MathUtils.degToRad(5));
