@@ -58,14 +58,22 @@ class App {
         if(this._pressedKeys["w"] || this._pressedKeys["a"] || this._pressedKeys["s"] || this._pressedKeys["d"]) {
             if(this._pressedKeys["shift"]) {
                 this._currentAnimationAction = this._animationMap["Run"];
+                this._speed = 350;
             } else { //shift와 함께 w, a, s, d를 누르면 뜀
-                this._currentAnimationAction = this._animationMap["Walk"];                
+                this._currentAnimationAction = this._animationMap["Walk"];
+                this._speed = 120;                
             } // w, a, s, d를 누르면 걷기
         } else {
             this._currentAnimationAction = this._animationMap["Idle"];
+            this._speed = 0;
         } // 어떤한 키도 누르지 않으면 Idle이라는 행동을 취함
         if(this._pressedKeys["c"]) {
             this._currentAnimationAction = this._animationMap["Capoeira"];
+            this._speed = 0;
+        }
+        if(this._pressedKeys["g"]) {
+            this._currentAnimationAction = this._animationMap["GangnamStyle"];
+            this._speed = 0;
         }
 
         if(previousAnimationAction !== this._currentAnimationAction) {
@@ -202,6 +210,8 @@ class App {
         return directionOffset;        
     }
 
+    _speed = 0;
+
     update(time) {
         time *= 0.001; // second unit
 
@@ -230,6 +240,26 @@ class App {
             );
 
             this._model.quaternion.rotateTowards(rotateQuarternion, THREE.MathUtils.degToRad(5));
+
+            const walkDirection = new THREE.Vector3();
+            this._camera.getWorldDirection(walkDirection);
+
+            walkDirection.y = 0;
+            walkDirection.normalize();
+
+            walkDirection.applyAxisAngle(new THREE.Vector3(0, 1, 0), this._directionOffset());
+
+            const moveX = walkDirection.x * (this._speed * deltaTime);
+            const movez = walkDirection.z * (this._speed * deltaTime);
+
+            this._model.position.x += moveX;
+            this._model.position.z += movez;
+
+            this._controls.target.set(
+                this._model.position.x,
+                this._model.position.y,
+                this._model.position.z,
+            );
         }
         this._previousTime = time;
     }
