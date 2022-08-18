@@ -13,7 +13,7 @@ class App {
         divContainer.appendChild(renderer.domElement);
 
         renderer.shadowMap.enabled = true;
-        renderer.shadowMap.type = THREE.VSMShadowMap;
+        renderer.shadowMap.type = THREE.VSMShadowMap; //그림자 설정
 
         this._renderer = renderer;
 
@@ -44,7 +44,7 @@ class App {
         document.addEventListener("keydown", (event) => {
             this._pressedKeys[event.key.toLowerCase()] = true;
             this._processAnimation();
-        });
+        }); // 키 event 확인 뒤 processAnimation 함수 호출
 
         document.addEventListener("keyup", (event) => {
             this._pressedKeys[event.key.toLowerCase()] = false;
@@ -58,12 +58,12 @@ class App {
         if(this._pressedKeys["w"] || this._pressedKeys["a"] || this._pressedKeys["s"] || this._pressedKeys["d"]) {
             if(this._pressedKeys["shift"]) {
                 this._currentAnimationAction = this._animationMap["Run"];
-            } else {
+            } else { //shift와 함께 w, a, s, d를 누르면 뜀
                 this._currentAnimationAction = this._animationMap["Walk"];                
-            }
+            } // w, a, s, d를 누르면 걷기
         } else {
             this._currentAnimationAction = this._animationMap["Idle"];
-        }
+        } // 어떤한 키도 누르지 않으면 Idle이라는 행동을 취함
         if(this._pressedKeys["c"]) {
             this._currentAnimationAction = this._animationMap["Capoeira"];
         }
@@ -75,20 +75,20 @@ class App {
     }
 
     _setupModel() {
-        const planeGeometry = new THREE.PlaneGeometry(1000, 1000);
+        const planeGeometry = new THREE.PlaneGeometry(1000, 1000); // 바닥 설정
         const planeMaterial = new THREE.MeshPhongMaterial({color: 0x878787 });
         const plane = new THREE.Mesh(planeGeometry, planeMaterial);
         plane.rotation.x = -Math.PI/2;
         this._scene.add(plane);
-        plane.receiveShadow=true;
+        plane.receiveShadow=true; // 바닥은 그림자가 생기지 않는다 
 
-        new GLTFLoader().load("./data/character.glb", (gltf) => {
+        new GLTFLoader().load("./data/character.glb", (gltf) => { //data 파일 안에 있는 캐릭터를 불러옴
             const model = gltf.scene;
             this._scene.add(model);
 
-            model.traverse(child => {
+            model.traverse(child => { 
                 if(child instanceof THREE.Mesh) {
-                    child.castShadow = true;
+                    child.castShadow = true; //캐릭터 그림자
                 }
             });
 
@@ -99,7 +99,7 @@ class App {
                 const name=clip.name;
                 console.log(name);
                 animationsMap[name] = mixer.clipAction(clip);
-            });
+            }); // 캐릭터가 할 수 있는 행동 consoledp 뛰오고 animationsMap에 저장
 
             this._mixer = mixer;
             this._animationMap=animationsMap;
@@ -131,7 +131,7 @@ class App {
         this._camera = camera;
     }
 
-    _addPointLight(x, y, z, helperColor) {
+    _addPointLight(x, y, z, helperColor) { // 빛을 여러개 만들기 위한 함수
         const color = 0xffffff;
         const intensity = 1.5;
 
@@ -148,11 +148,12 @@ class App {
         const ambientLight = new THREE.AmbientLight(0xffffff, .5);
         this._scene.add(ambientLight);
 
-        this._addPointLight(500, 150, 500, 0xff0000);
+        this._addPointLight(500, 150, 500, 0xff0000); //_addPointLight를 불러와 빛 설정
         this._addPointLight(-500, 150, 500, 0xffff00);
         this._addPointLight(-500, 150, -500, 0x00ff00);
         this._addPointLight(500, 150, -500, 0x0000ff);
 
+        // 빛에 따른 그림자 설정
         const shadowLight = new THREE.DirectionalLight(0xffffff, 0.2);
         shadowLight.position.set(200, 500, 200);
         shadowLight.target.position.set(0, 0, 0);
@@ -174,6 +175,33 @@ class App {
         this._scene.add(shadowCameraHelper);
     }
 
+    _directionOffset() {
+        const pressedKeys = this._pressedKeys;
+        let directionOffset = 0 // w
+
+        if (pressedKeys['w']) {
+            if (pressedKeys['a']) {
+                directionOffset = Math.PI / 4 // w+a (45도)
+            } else if (pressedKeys['d']) {
+                directionOffset = - Math.PI / 4 // w+d (-45도)
+            }
+        } else if (pressedKeys['s']) {
+            if (pressedKeys['a']) {
+                directionOffset = Math.PI / 4 + Math.PI / 2 // s+a (135도)
+            } else if (pressedKeys['d']) {
+                directionOffset = -Math.PI / 4 - Math.PI / 2 // s+d (-135도)
+            } else {
+                directionOffset = Math.PI // s (180도)
+            }
+        } else if (pressedKeys['a']) {
+            directionOffset = Math.PI / 2 // a (90도)
+        } else if (pressedKeys['d']) {
+            directionOffset = - Math.PI / 2 // d (-90도)
+        }
+
+        return directionOffset;        
+    }
+
     update(time) {
         time *= 0.001; // second unit
 
@@ -188,6 +216,20 @@ class App {
         if(this._mixer){
             const deltaTime = time - this._previousTime;
             this._mixer.update(deltaTime);
+
+            // 사용자가 바라보고 있는 화면 바라 보고 있도록 설정
+            const angleCameraDirectionAxisY = Math.atan2(
+                (this._camera.position.x - this._model.position.x),
+                (this._camera.position.z - this._model.position.z)
+            )  + Math.PI;
+
+            const rotateQuarternion = new THREE.Quaternion();
+            rotateQuarternion.setFromAxisAngle(
+                new THREE.Vector3(0,1,0),
+                angleCameraDirectionAxisY + this._directionOffset() // 누르는 키에 따른 캐릭터가 보는 방향을 정해주는 곳
+            );
+
+            this._model.quaternion.rotateTowards(rotateQuarternion, THREE.MathUtils.degToRad(5));
         }
         this._previousTime = time;
     }
