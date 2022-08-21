@@ -58,19 +58,18 @@ class App {
         if(this._pressedKeys["w"] || this._pressedKeys["a"] || this._pressedKeys["s"] || this._pressedKeys["d"]) {
             if(this._pressedKeys["shift"]) {
                 this._currentAnimationAction = this._animationMap["Run"];
-                this._maxSpeed=350;
+                this._maxSpeed=450;
                 this._accelration = 8;
             } else { //shift와 함께 w, a, s, d를 누르면 뜀
                 this._currentAnimationAction = this._animationMap["Walk"];
                 this._maxSpeed = 120;
-                this._accelration = 8;                
+                this._accelration = 3;                
             } // w, a, s, d를 누르면 걷기
         } else {
             this._currentAnimationAction = this._animationMap["Idle"];
             this._speed = 0;
             this._maxSpeed = 0;
-            this._accelration = 0;
-
+            this._acceleration = 0;
         } // 어떤한 키도 누르지 않으면 Idle이라는 행동을 취함
         if(this._pressedKeys["c"]) {
             this._currentAnimationAction = this._animationMap["Capoeira"];
