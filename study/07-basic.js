@@ -58,22 +58,31 @@ class App {
         if(this._pressedKeys["w"] || this._pressedKeys["a"] || this._pressedKeys["s"] || this._pressedKeys["d"]) {
             if(this._pressedKeys["shift"]) {
                 this._currentAnimationAction = this._animationMap["Run"];
-                this._speed = 350;
+                this._maxSpeed=350;
+                this._accelration = 8;
             } else { //shift와 함께 w, a, s, d를 누르면 뜀
                 this._currentAnimationAction = this._animationMap["Walk"];
-                this._speed = 120;                
+                this._maxSpeed = 120;
+                this._accelration = 8;                
             } // w, a, s, d를 누르면 걷기
         } else {
             this._currentAnimationAction = this._animationMap["Idle"];
             this._speed = 0;
+            this._maxSpeed = 0;
+            this._accelration = 0;
+
         } // 어떤한 키도 누르지 않으면 Idle이라는 행동을 취함
         if(this._pressedKeys["c"]) {
             this._currentAnimationAction = this._animationMap["Capoeira"];
             this._speed = 0;
+            this._maxSpeed = 0;
+            this._accelration = 0;
         }
         if(this._pressedKeys["g"]) {
             this._currentAnimationAction = this._animationMap["GangnamStyle"];
             this._speed = 0;
+            this._maxSpeed = 0;
+            this._accelration = 0;
         }
 
         if(previousAnimationAction !== this._currentAnimationAction) {
@@ -211,6 +220,8 @@ class App {
     }
 
     _speed = 0;
+    _maxSpeed = 0; //최대 속도
+    _accelration = 0; //점점 속도 빨라지게 확인 위한 변수
 
     update(time) {
         time *= 0.001; // second unit
@@ -227,7 +238,7 @@ class App {
             const deltaTime = time - this._previousTime;
             this._mixer.update(deltaTime);
 
-            // 사용자가 바라보고 있는 화면 바라 보고 있도록 설정
+            // 사용자가 바라보고 있는 화면 쪽을 캐릭터가 바라 보고 있도록 설정
             const angleCameraDirectionAxisY = Math.atan2(
                 (this._camera.position.x - this._model.position.x),
                 (this._camera.position.z - this._model.position.z)
@@ -247,12 +258,15 @@ class App {
             walkDirection.y = 0;
             walkDirection.normalize();
 
+            if(this._speed < this._maxSpeed) this._speed += this._accelration;
+            else this._speed -= this._accelration;
+
             walkDirection.applyAxisAngle(new THREE.Vector3(0, 1, 0), this._directionOffset());
 
-            const moveX = walkDirection.x * (this._speed * deltaTime);
+            const moveX = walkDirection.x * (this._speed * deltaTime); //이동 시키 위한 코드
             const movez = walkDirection.z * (this._speed * deltaTime);
 
-            this._model.position.x += moveX;
+            this._model.position.x += moveX; // 지속적인 위치 변경
             this._model.position.z += movez;
 
             this._controls.target.set(
