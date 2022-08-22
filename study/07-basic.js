@@ -191,6 +191,8 @@ class App {
         this._scene.add(shadowCameraHelper);
     }
 
+    _previousDirectionOffset = 0;
+
     _directionOffset() {
         const pressedKeys = this._pressedKeys;
         let directionOffset = 0 // w
@@ -213,7 +215,11 @@ class App {
             directionOffset = Math.PI / 2 // a (90도)
         } else if (pressedKeys['d']) {
             directionOffset = - Math.PI / 2 // d (-90도)
+        } else {
+            directionOffset = this._previousDirectionOffset;
         }
+
+        this._previousDirectionOffset = directionOffset;
 
         return directionOffset;        
     }
