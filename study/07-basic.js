@@ -35,6 +35,7 @@ class App {
         this._controls = new OrbitControls(this._camera, this._divContainer);
         this._controls.target.set(0, 100, 0);
         this._controls.enablePan = false;
+        this._controls.enableDamping = true;
         
         const stats = new Stats();
         this._divContainer.appendChild(stats.dom);
