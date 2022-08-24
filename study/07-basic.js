@@ -2,6 +2,8 @@ import * as THREE from '../build/three.module.js';
 import { OrbitControls } from "../examples/jsm/controls/OrbitControls.js"
 import { GLTFLoader } from "../examples/jsm/loaders/GLTFLoader.js"
 import Stats from "../examples/jsm/libs/stats.module.js";
+import {Octree} from "../examples/jsm/math/Octree.js"; //3차원을 호율적으로 관리
+import {Capsule} from "../examples/jsm/math/Capsule.js"
 
 class App {
     constructor() {
@@ -24,11 +26,16 @@ class App {
         this._setupLight();
         this._setupModel();
         this._setupControls();
+        this._setupOctree();
 
         window.onresize = this.resize.bind(this);
         this.resize();
 
         requestAnimationFrame(this.render.bind(this));
+    }
+
+    _setupOctree(){
+        this._worldOctree = new Octree();
     }
 
     _setupControls() {
@@ -75,13 +82,13 @@ class App {
         } // 어떤한 키도 누르지 않으면 Idle이라는 행동을 취함
         if(this._pressedKeys["c"]) {
             this._currentAnimationAction = this._animationMap["Capoeira"];
-            this._speed = 0;
+            this._speed = 50;
             this._maxSpeed = 0;
             this._accelration = 0;
         }
         if(this._pressedKeys["g"]) {
             this._currentAnimationAction = this._animationMap["GangnamStyle"];
-            this._speed = 0;
+            this._speed = 50;
             this._maxSpeed = 0;
             this._accelration = 0;
         }
@@ -93,12 +100,14 @@ class App {
     }
 
     _setupModel() {
-        const planeGeometry = new THREE.PlaneGeometry(1000, 1000); // 바닥 설정
+        const planeGeometry = new THREE.PlaneGeometry(1500, 1500); // 바닥 설정
         const planeMaterial = new THREE.MeshPhongMaterial({color: 0x878787 });
         const plane = new THREE.Mesh(planeGeometry, planeMaterial);
         plane.rotation.x = -Math.PI/2;
         this._scene.add(plane);
         plane.receiveShadow=true; // 바닥은 그림자가 생기지 않는다 
+
+        this._worldOctree.fromGraphNode(plane);
 
         new GLTFLoader().load("./data/character.glb", (gltf) => { //data 파일 안에 있는 캐릭터를 불러옴
             const model = gltf.scene;
@@ -126,6 +135,15 @@ class App {
 
             const box=(new THREE.Box3).setFromObject(model);
             model.position.y=(box.max.y-box.min.y)/2;
+
+            const height = box.max.y - box.min.y; // box는 캐릭터를 감싸고 있는 것
+            const diameter = box.max.z - box.min.z;
+
+            model._capsule = new Capsule(
+                new THREE.Vector3(0, diameter/2, 0), // start 좌표
+                new THREE.Vector3(0, height-diameter/2, 0), // end 좌표
+                diameter/2
+            );
 
             const axisHelper = new THREE.AxesHelper(1000);
             this._scene.add(axisHelper);
