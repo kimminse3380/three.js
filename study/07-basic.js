@@ -2,8 +2,9 @@ import * as THREE from '../build/three.module.js';
 import { OrbitControls } from "../examples/jsm/controls/OrbitControls.js"
 import { GLTFLoader } from "../examples/jsm/loaders/GLTFLoader.js"
 import Stats from "../examples/jsm/libs/stats.module.js";
-import {Octree} from "../examples/jsm/math/Octree.js"; //3차원을 호율적으로 관리
-import {Capsule} from "../examples/jsm/math/Capsule.js"
+
+import { Octree } from "../examples/jsm/math/Octree.js" // xyz 축을 더 좋게 해줌
+import { Capsule } from "../examples/jsm/math/Capsule.js"
 
 class App {
     constructor() {
@@ -15,18 +16,18 @@ class App {
         divContainer.appendChild(renderer.domElement);
 
         renderer.shadowMap.enabled = true;
-        renderer.shadowMap.type = THREE.VSMShadowMap; //그림자 설정
+        renderer.shadowMap.type = THREE.VSMShadowMap;
 
         this._renderer = renderer;
 
         const scene = new THREE.Scene();
         this._scene = scene;
 
+        this._setupOctree();
         this._setupCamera();
         this._setupLight();
         this._setupModel();
         this._setupControls();
-        this._setupOctree();
 
         window.onresize = this.resize.bind(this);
         this.resize();
@@ -34,16 +35,16 @@ class App {
         requestAnimationFrame(this.render.bind(this));
     }
 
-    _setupOctree(){
+    _setupOctree() {
         this._worldOctree = new Octree();
     }
 
     _setupControls() {
-        this._controls = new OrbitControls(this._camera, this._divContainer);
+        this._controls = new OrbitControls(this._camera, this._divContainer); // 마우스로 화면 돌리기
         this._controls.target.set(0, 100, 0);
         this._controls.enablePan = false;
         this._controls.enableDamping = true;
-        
+
         const stats = new Stats();
         this._divContainer.appendChild(stats.dom);
         this._fps = stats; 
@@ -53,7 +54,7 @@ class App {
         document.addEventListener("keydown", (event) => {
             this._pressedKeys[event.key.toLowerCase()] = true;
             this._processAnimation();
-        }); // 키 event 확인 뒤 processAnimation 함수 호출
+        });
 
         document.addEventListener("keyup", (event) => {
             this._pressedKeys[event.key.toLowerCase()] = false;
@@ -64,22 +65,24 @@ class App {
     _processAnimation() {
         const previousAnimationAction = this._currentAnimationAction;
 
-        if(this._pressedKeys["w"] || this._pressedKeys["a"] || this._pressedKeys["s"] || this._pressedKeys["d"]) {
-            if(this._pressedKeys["shift"]) {
+        if(this._pressedKeys["w"] || this._pressedKeys["a"] || this._pressedKeys["s"] || this._pressedKeys["d"]) {// wasd로 조정
+            if(this._pressedKeys["shift"]) { // shift 누르면 달리기
                 this._currentAnimationAction = this._animationMap["Run"];
-                this._maxSpeed=450;
-                this._accelration = 8;
-            } else { //shift와 함께 w, a, s, d를 누르면 뜀
-                this._currentAnimationAction = this._animationMap["Walk"];
-                this._maxSpeed = 120;
-                this._accelration = 3;                
-            } // w, a, s, d를 누르면 걷기
-        } else {
+                // this._speed = 350;
+                this._maxSpeed = 450;
+                this._acceleration = 8;                
+            } else { //아니면 걷기
+                this._currentAnimationAction = this._animationMap["Walk"];                
+                //this._speed = 80;
+                this._maxSpeed = 80;
+                this._acceleration = 3;
+            }
+        } else { //가만히 있으면 idle 행동
             this._currentAnimationAction = this._animationMap["Idle"];
             this._speed = 0;
             this._maxSpeed = 0;
             this._acceleration = 0;
-        } // 어떤한 키도 누르지 않으면 Idle이라는 행동을 취함
+        }
         if(this._pressedKeys["c"]) {
             this._currentAnimationAction = this._animationMap["Capoeira"];
             this._speed = 50;
@@ -100,58 +103,67 @@ class App {
     }
 
     _setupModel() {
-        const planeGeometry = new THREE.PlaneGeometry(1500, 1500); // 바닥 설정
-        const planeMaterial = new THREE.MeshPhongMaterial({color: 0x878787 });
+        const planeGeometry = new THREE.PlaneGeometry(1500, 1500); // 바닥
+        const planeMaterial = new THREE.MeshPhongMaterial({ color: 0x878787 });
         const plane = new THREE.Mesh(planeGeometry, planeMaterial);
         plane.rotation.x = -Math.PI/2;
         this._scene.add(plane);
-        plane.receiveShadow=true; // 바닥은 그림자가 생기지 않는다 
+        plane.receiveShadow = true;
 
-        this._worldOctree.fromGraphNode(plane);
+        this._worldOctree.fromGraphNode(plane); //밑에 바닥 생성
 
-        new GLTFLoader().load("./data/character.glb", (gltf) => { //data 파일 안에 있는 캐릭터를 불러옴
+        new GLTFLoader().load("./data/character.glb", (gltf) => { // 캐릭터를 불러옴 
             const model = gltf.scene;
             this._scene.add(model);
 
-            model.traverse(child => { 
+            model.traverse(child => {
                 if(child instanceof THREE.Mesh) {
-                    child.castShadow = true; //캐릭터 그림자
+                    child.castShadow = true;
                 }
             });
 
-            const animationClips = gltf.animations;
+            const animationClips = gltf.animations; // THREE.AnimationClip[]
             const mixer = new THREE.AnimationMixer(model);
-            const animationsMap ={};
+            const animationsMap = {};
             animationClips.forEach(clip => {
-                const name=clip.name;
+                const name = clip.name;
                 console.log(name);
-                animationsMap[name] = mixer.clipAction(clip);
-            }); // 캐릭터가 할 수 있는 행동 consoledp 뛰오고 animationsMap에 저장
+                animationsMap[name] = mixer.clipAction(clip); // THREE.AnimationAction
+            });
 
             this._mixer = mixer;
-            this._animationMap=animationsMap;
+            this._animationMap = animationsMap; //animation 불러오기
             this._currentAnimationAction = this._animationMap["Idle"];
             this._currentAnimationAction.play();
 
-            const box=(new THREE.Box3).setFromObject(model);
-            model.position.y=(box.max.y-box.min.y)/2;
+            const box = (new THREE.Box3).setFromObject(model);
+            model.position.y = (box.max.y - box.min.y) / 2;
 
-            const height = box.max.y - box.min.y; // box는 캐릭터를 감싸고 있는 것
+            const height = box.max.y - box.min.y;
             const diameter = box.max.z - box.min.z;
 
-            model._capsule = new Capsule(
-                new THREE.Vector3(0, diameter/2, 0), // start 좌표
-                new THREE.Vector3(0, height-diameter/2, 0), // end 좌표
+            model._capsule = new Capsule( //캡슐 불러오기
+                new THREE.Vector3(0, diameter/2, 0), 
+                new THREE.Vector3(0, height - diameter/2, 0), 
                 diameter/2
-            );
+            );            
 
             const axisHelper = new THREE.AxesHelper(1000);
             this._scene.add(axisHelper);
 
             const boxHelper = new THREE.BoxHelper(model);
-            this._scene.add(boxHelper);
+            this._scene.add(boxHelper);          
             this._boxHelper = boxHelper;
-            this._model = model;
+            this._model = model;  
+
+            const boxG = new THREE.BoxGeometry(100, diameter-5, 100);
+            const boxM = new THREE.Mesh(boxG, planeMaterial);
+            boxM.receiveShadow = true;
+            boxM.castShadow = true;
+            boxM.position.set(150, 0, 0);
+            this._scene.add(boxM);    
+            
+            this._worldOctree.fromGraphNode(boxM); //충돌하면 올라가기
         });
     }
 
@@ -167,15 +179,15 @@ class App {
         this._camera = camera;
     }
 
-    _addPointLight(x, y, z, helperColor) { // 빛을 여러개 만들기 위한 함수
+    _addPointLight(x, y, z, helperColor) {
         const color = 0xffffff;
         const intensity = 1.5;
-
+    
         const pointLight = new THREE.PointLight(color, intensity, 2000);
         pointLight.position.set(x, y, z);
-
+    
         this._scene.add(pointLight);
-
+    
         const pointLightHelper = new THREE.PointLightHelper(pointLight, 10, helperColor);
         this._scene.add(pointLightHelper);
     }
@@ -184,12 +196,11 @@ class App {
         const ambientLight = new THREE.AmbientLight(0xffffff, .5);
         this._scene.add(ambientLight);
 
-        this._addPointLight(500, 150, 500, 0xff0000); //_addPointLight를 불러와 빛 설정
+        this._addPointLight(500, 150, 500, 0xff0000); // add point로 여러방향에서 빛이 오는가 확인
         this._addPointLight(-500, 150, 500, 0xffff00);
         this._addPointLight(-500, 150, -500, 0x00ff00);
         this._addPointLight(500, 150, -500, 0x0000ff);
 
-        // 빛에 따른 그림자 설정
         const shadowLight = new THREE.DirectionalLight(0xffffff, 0.2);
         shadowLight.position.set(200, 500, 200);
         shadowLight.target.position.set(0, 0, 0);
@@ -199,6 +210,7 @@ class App {
         this._scene.add(shadowLight);
         this._scene.add(shadowLight.target);
 
+        //그림자 설정
         shadowLight.castShadow = true;
         shadowLight.shadow.mapSize.width = 1024;
         shadowLight.shadow.mapSize.height = 1024;
@@ -209,7 +221,7 @@ class App {
         shadowLight.shadow.radius = 5;
         const shadowCameraHelper = new THREE.CameraHelper(shadowLight.shadow.camera);
         this._scene.add(shadowCameraHelper);
-    }
+    }    
 
     _previousDirectionOffset = 0;
 
@@ -245,60 +257,105 @@ class App {
     }
 
     _speed = 0;
-    _maxSpeed = 0; //최대 속도
-    _accelration = 0; //점점 속도 빨라지게 확인 위한 변수
+    _maxSpeed = 0;
+    _acceleration = 0;
+
+    _bOnTheGround = false;
+    _fallingAcceleration = 0;
+    _fallingSpeed = 0;  
 
     update(time) {
         time *= 0.001; // second unit
 
         this._controls.update();
 
-        if(this._boxHelper){
+        if(this._boxHelper) {
             this._boxHelper.update();
         }
 
         this._fps.update();
 
-        if(this._mixer){
+        if(this._mixer) {
             const deltaTime = time - this._previousTime;
             this._mixer.update(deltaTime);
 
-            // 사용자가 바라보고 있는 화면 쪽을 캐릭터가 바라 보고 있도록 설정
             const angleCameraDirectionAxisY = Math.atan2(
                 (this._camera.position.x - this._model.position.x),
                 (this._camera.position.z - this._model.position.z)
-            )  + Math.PI;
+            ) + Math.PI;
 
             const rotateQuarternion = new THREE.Quaternion();
             rotateQuarternion.setFromAxisAngle(
-                new THREE.Vector3(0,1,0),
+                new THREE.Vector3(0,1,0), 
                 angleCameraDirectionAxisY + this._directionOffset()
             );
-
-            this._model.quaternion.rotateTowards(rotateQuarternion, THREE.MathUtils.degToRad(5));
+            
+            this._model.quaternion.rotateTowards(rotateQuarternion, THREE.MathUtils.degToRad(5));            
 
             const walkDirection = new THREE.Vector3();
             this._camera.getWorldDirection(walkDirection);
 
-            walkDirection.y = 0;
+            //walkDirection.y = 0;
+            walkDirection.y = this._bOnTheGround ? 0 : -1;
             walkDirection.normalize();
 
-            if(this._speed < this._maxSpeed) this._speed += this._accelration;
-            else this._speed -= this._accelration;
+            walkDirection.applyAxisAngle(new THREE.Vector3(0,1,0), this._directionOffset());
 
-            walkDirection.applyAxisAngle(new THREE.Vector3(0, 1, 0), this._directionOffset());
+            if(this._speed < this._maxSpeed) this._speed += this._acceleration;
+            else this._speed -= this._acceleration*2;
 
-            const moveX = walkDirection.x * (this._speed * deltaTime); //이동 시키 위한 코드
-            const movez = walkDirection.z * (this._speed * deltaTime);
+            if(!this._bOnTheGround) {
+                this._fallingAcceleration += 1;
+                this._fallingSpeed += Math.pow(this._fallingAcceleration, 2);
+            } else {
+                this._fallingAcceleration = 0;
+                this._fallingSpeed = 0;
+            }
 
-            this._model.position.x += moveX; // 지속적인 위치 변경
-            this._model.position.z += movez;
+            const velocity = new THREE.Vector3(
+                walkDirection.x * this._speed, 
+                walkDirection.y * this._fallingSpeed, 
+                walkDirection.z * this._speed
+            );
 
+            const deltaPosition = velocity.clone().multiplyScalar(deltaTime);
+
+            // const moveX = walkDirection.x * (this._speed * deltaTime);
+            // const moveZ = walkDirection.z * (this._speed * deltaTime);
+
+            // this._model.position.x += moveX;
+            // this._model.position.z += moveZ;    
+
+            this._model._capsule.translate(deltaPosition);
+
+            const result = this._worldOctree.capsuleIntersect(this._model._capsule);
+            if(result) { // 충돌한 경우
+                this._model._capsule.translate(result.normal.multiplyScalar(result.depth));
+                this._bOnTheGround = true; 
+            } else { // 충돌하지 않은 경우
+                this._bOnTheGround = false;
+            }
+
+            const previousPosition = this._model.position.clone();
+            const capsuleHeight =  this._model._capsule.end.y - this._model._capsule.start.y 
+                + this._model._capsule.radius*2;
+            this._model.position.set(
+                this._model._capsule.start.x, 
+                this._model._capsule.start.y - this._model._capsule.radius + capsuleHeight/2, 
+                this._model._capsule.start.z
+            );             
+
+            // this._camera.position.x += moveX;
+            // this._camera.position.z += moveZ;
+            this._camera.position.x -= previousPosition.x - this._model.position.x;
+            this._camera.position.z -= previousPosition.z - this._model.position.z;            
+            
             this._controls.target.set(
                 this._model.position.x,
                 this._model.position.y,
                 this._model.position.z,
             );
+            
         }
         this._previousTime = time;
     }
