@@ -91,7 +91,7 @@ class App {
         }
         if(this._pressedKeys["g"]) {
             this._currentAnimationAction = this._animationMap["GangnamStyle"];
-            this._speed = 50;
+            this._speed = 100;
             this._maxSpeed = 0;
             this._accelration = 0;
         }
@@ -330,7 +330,7 @@ class App {
 
             const result = this._worldOctree.capsuleIntersect(this._model._capsule);
             if(result) { // 충돌한 경우
-                this._model._capsule.translate(result.normal.multiplyScalar(result.depth));
+                this._model._capsule.translate(result.normal.multiplyScalar(result.depth)); //capsule 먼저 보냄
                 this._bOnTheGround = true; 
             } else { // 충돌하지 않은 경우
                 this._bOnTheGround = false;
