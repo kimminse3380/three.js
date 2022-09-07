@@ -212,10 +212,10 @@ class App {
         const ambientLight = new THREE.AmbientLight(0xffffff, .5);
         this._scene.add(ambientLight);
 
-        this._addPointLight(500, 150, 500, 0xff0000); // add point로 여러방향에서 빛이 오는가 확인
-        this._addPointLight(-500, 150, 500, 0xffff00);
-        this._addPointLight(-500, 150, -500, 0x00ff00);
-        this._addPointLight(500, 150, -500, 0x0000ff);
+        this._addPointLight(800, 300, 800, 0xff0000); // add point로 여러방향에서 빛이 오는가 확인
+        this._addPointLight(-800, 300, 800, 0xffff00);
+        this._addPointLight(-800, 300, -800, 0x00ff00);
+        this._addPointLight(800, 300, -800, 0x0000ff);
 
         const shadowLight = new THREE.DirectionalLight(0xffffff, 0.2);
         shadowLight.position.set(200, 500, 200);
